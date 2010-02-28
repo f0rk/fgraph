@@ -383,6 +383,275 @@ fgraph_return_t fgraph_list_size(fgraph_list_t **list, unsigned long *rvalue) {
     return FGRAPH_SUCCESS;
 }
 
+/* heap operations */
+fgraph_return_t fgraph_heap_init(fgraph_heap_t **heap, unsigned long size) {
+    unsigned long i = 0;
+    
+    if((*heap) != 0) {
+        return FGRAPH_EINITED;
+    }
+    
+    *heap = (fgraph_heap_t*)malloc(sizeof(fgraph_heap_t));
+    if((*heap) == 0) {
+        return FGRAPH_ENOMEM;
+    }
+    
+    (*heap)->pq = (long*)malloc(sizeof(long)*size+1);
+    if((*heap)->pq == 0) {
+        free(*heap);
+        return FGRAPH_ENOMEM;
+    }
+    
+    (*heap)->qp = (long*)malloc(sizeof(long)*size+1);
+    if((*heap)->qp == 0) {
+        free((*heap)->pq);
+        free(*heap);
+        return FGRAPH_ENOMEM;
+    }
+    
+    (*heap)->pri = (fgraph_edge_weight_t*)malloc(sizeof(long)*size+1);
+    if((*heap)->pri == 0) {
+        free((*heap)->pq);
+        free((*heap)->qp);
+        free(*heap);
+        return FGRAPH_ENOMEM;
+    }
+    
+    (*heap)->size = size+1;
+    (*heap)->n = 0;
+    
+    for(i = 0; i < (*heap)->size; ++i) {
+        (*heap)->qp[i] = -1;
+        (*heap)->pri[i] = FGRAPH_EDGE_WEIGHT_MIN;
+    }
+    
+    return FGRAPH_SUCCESS;
+}
+
+fgraph_return_t fgraph_heap_clear(fgraph_heap_t **heap) {
+    if((*heap) == 0) {
+        return FGRAPH_ENULL;
+    }
+    
+    if((*heap)->pq == 0) {
+        return FGRAPH_ENULL;
+    }
+    
+    if((*heap)->qp == 0) {
+        return FGRAPH_ENULL;
+    }
+    
+    if((*heap)->pri == 0) {
+        return FGRAPH_ENULL;
+    }
+    
+    free((*heap)->pq);
+    free((*heap)->qp);
+    free((*heap)->pri);
+    (*heap)->size = 0;
+    (*heap)->n = 0;
+    free(*heap);
+    
+    *heap = 0;
+    
+    return FGRAPH_SUCCESS;
+}
+
+fgraph_return_t fgraph_heap_insert(fgraph_heap_t **heap, unsigned long key, fgraph_edge_weight_t value) {
+    long r = 0;
+    
+    if((*heap) == 0) {
+        return FGRAPH_ENULL;
+    }
+    
+    if((*heap)->pri[key] != FGRAPH_EDGE_WEIGHT_MIN) {
+        return FGRAPH_EEXISTS;
+    }
+    
+    ++((*heap)->n);
+    (*heap)->qp[key] = (*heap)->n;
+    (*heap)->pq[(*heap)->n] = key;
+    (*heap)->pri[key] = value;
+    r = fgraph_heap_swim(heap, (*heap)->n);
+    if(r != FGRAPH_SUCCESS) {
+        return r; //should never happen
+    }
+    
+    return FGRAPH_SUCCESS;
+}
+
+fgraph_return_t fgraph_heap_remove(fgraph_heap_t **heap, unsigned long *rkey) {
+    long r = 0;
+    
+    if((*heap) == 0) {
+        return FGRAPH_ENULL;
+    }
+    
+    if(rkey == 0) {
+        return FGRAPH_ENULL;
+    }
+    
+    if((*heap)->n == 0) {
+        *rkey = -1;
+        return FGRAPH_EEMPTY;
+    }
+    
+    *rkey = (*heap)->pq[1];
+    (*heap)->qp[*rkey] = -1;
+    r = fgraph_heap_swap(heap, 1, ((*heap)->n)--);
+    if(r != FGRAPH_SUCCESS) {
+        return r; //should never happen
+    }
+    r = fgraph_heap_sink(heap, 1);
+    if(r != FGRAPH_SUCCESS) {
+        return r; //should never happen
+    }
+    
+    return FGRAPH_SUCCESS;
+}
+
+fgraph_return_t fgraph_heap_decrease(fgraph_heap_t **heap, unsigned long key, fgraph_edge_weight_t value) {
+    long r = 0;
+    
+    if((*heap) == 0) {
+        return FGRAPH_ENULL;
+    }
+    
+    if((*heap)->pri[key] < value) {
+        return FGRAPH_EORDER;
+    }
+    
+    (*heap)->pri[key] = value;
+    r = fgraph_heap_swim(heap, (*heap)->qp[key]);
+    if(r != FGRAPH_SUCCESS) {
+        return r; //should never happen
+    }
+    
+    return FGRAPH_SUCCESS;
+}
+
+fgraph_return_t fgraph_heap_size(fgraph_heap_t **heap, unsigned long *rsize) {
+    if((*heap) == 0) {
+        return FGRAPH_ENULL;
+    }
+    
+    if(rsize == 0) {
+        return FGRAPH_ENULL;
+    }
+    
+    *rsize = (*heap)->n;
+    
+    return FGRAPH_SUCCESS;
+}
+
+fgraph_return_t fgraph_heap_max(fgraph_heap_t **heap, unsigned long *rmax) {
+    if((*heap) == 0) {
+        return FGRAPH_ENULL;
+    }
+    
+    if(rmax == 0) {
+        return FGRAPH_ENULL;
+    }
+    
+    *rmax = (*heap)->size;
+    
+    return FGRAPH_SUCCESS;
+}
+
+fgraph_return_t fgraph_heap_swim(fgraph_heap_t **heap, unsigned long i) {
+    long r = 0; int b = 0;
+    
+    if((*heap) == 0) {
+        return FGRAPH_ENULL;
+    }
+    
+    while(i > 1) {
+        r = fgraph_heap_more(heap, i/2, i, &b);
+        if(r != FGRAPH_SUCCESS) {
+            return r; //should never happen
+        }
+        
+        if(b == 0) {
+            break;
+        }
+        
+        r = fgraph_heap_swap(heap, i, i/2);
+        if(r != FGRAPH_SUCCESS) {
+            return r; //should never happen
+        }
+        
+        i /= 2;
+    }
+    return FGRAPH_SUCCESS;
+}
+
+fgraph_return_t fgraph_heap_sink(fgraph_heap_t **heap, unsigned long i) {
+    unsigned long j = 0; int b = 0; long r = 0;
+    
+    if((*heap) == 0) {
+        return FGRAPH_ENULL;
+    }
+    
+    while(2*i <= (*heap)->n) {
+        j = 2*i;
+        
+        r = fgraph_heap_more(heap, j, j+1, &b);
+        if(r != FGRAPH_SUCCESS) {
+            return r; //should never happen
+        }
+        
+        if(j < (*heap)->n && b != 0) {
+            j++;
+        }
+        
+        r = fgraph_heap_more(heap, i, j, &b);
+        if(r != FGRAPH_SUCCESS) {
+            return r; //should never happen
+        }
+        
+        if(b == 0) {
+            break;
+        }
+        
+        r = fgraph_heap_swap(heap, i, j);
+        if(r != FGRAPH_SUCCESS) {
+            return r; //should never happen
+        }
+        
+        i = j;
+    }
+    
+    return FGRAPH_SUCCESS;
+}
+
+fgraph_return_t fgraph_heap_more(fgraph_heap_t **heap, unsigned long i, unsigned long j, int *res) {
+    if((*heap) == 0) {
+        return FGRAPH_ENULL;
+    }
+    
+    if(res == 0) {
+        return FGRAPH_ENULL;
+    }
+    
+    *res = ((*heap)->pri[(*heap)->pq[i]]) > ((*heap)->pri[(*heap)->pq[j]]);
+    
+    return FGRAPH_SUCCESS;
+}
+
+fgraph_return_t fgraph_heap_swap(fgraph_heap_t **heap, unsigned long i, unsigned long j) {
+    if((*heap) == 0) {
+        return FGRAPH_ENULL;
+    }
+    
+    long swap = (*heap)->pq[i];
+    (*heap)->pq[i] = (*heap)->pq[j];
+    (*heap)->pq[j] = swap;
+    (*heap)->qp[(*heap)->pq[i]] = i;
+    (*heap)->qp[(*heap)->pq[j]] = j;
+    
+    return FGRAPH_SUCCESS;
+}
+
 /* edge operations */
 fgraph_return_t fgraph_edge_add(fgraph_t **graph, unsigned long from, unsigned long to, fgraph_edge_weight_t weight) {
     fgraph_edge_t *ne = 0;
@@ -491,10 +760,6 @@ fgraph_return_t fgraph_sp_dag(fgraph_t **graph, unsigned long from, unsigned lon
     fgraph_list_t *sp = 0;
     
     if((*graph) == 0) {
-        return FGRAPH_ENULL;
-    }
-    
-    if((*graph)->vtx_to_edge == 0) {
         return FGRAPH_ENULL;
     }
     
@@ -669,6 +934,210 @@ fgraph_return_t fgraph_sp_dag(fgraph_t **graph, unsigned long from, unsigned lon
     free(p);
     
     return FGRAPH_SUCCESS;
+}
+
+fgraph_return_t fgraph_sp_dijkstra(fgraph_t **graph, unsigned long from, unsigned long to, fgraph_vec_t **rvec, fgraph_edge_weight_t *rweight) {
+    unsigned long *p = 0, i = 0, v = 0, *parentv = 0;
+    fgraph_heap_t *pq = 0;
+    fgraph_edge_t *e = 0;
+    long r = 0, si = 0, sv = 0;
+    fgraph_edge_weight_t *parentw = 0;
+    fgraph_list_t *path = 0;
+    
+    if((*graph) == 0) {
+        return FGRAPH_ENULL;
+    }
+    
+    if(rweight == 0) {
+        return FGRAPH_ENULL;
+    }
+    
+    if(from >= (*graph)->size || to >= (*graph)->size) {
+        return FGRAPH_EBOUNDS;
+    }
+    
+    if(!(((*graph)->options & FGRAPH_OWEIGHTED) == FGRAPH_OWEIGHTED)) { //use BFS, when implemented
+        //TODO: Implement fgraph_sp_bfs
+    }
+    
+    p = (unsigned long*)malloc(sizeof(unsigned long)*((*graph)->size));
+    if(p == 0) {
+        return FGRAPH_ENOMEM;
+    }
+    
+    parentv = (unsigned long*)malloc(sizeof(unsigned long)*((*graph)->size));
+    if(parentv == 0) {
+        free(p);
+        return FGRAPH_ENOMEM;
+    }
+    
+    parentw = (fgraph_edge_weight_t*)malloc(sizeof(fgraph_edge_weight_t)*((*graph)->size));
+    if(parentw == 0) {
+        free(p);
+        free(parentv);
+        return FGRAPH_ENOMEM;
+    }
+    
+    r = fgraph_heap_init(&pq, (*graph)->size);
+    if(r != FGRAPH_SUCCESS) {
+        free(p);
+        free(parentv);
+        free(parentw);
+        return r;
+    }
+    
+    for(i = 0; i < (*graph)->size; ++i) {
+        p[i] = ULONG_MAX;
+    }
+    
+    p[from] = 0;
+    r = fgraph_heap_insert(&pq, from, 0);
+    if(r != FGRAPH_SUCCESS) {
+        free(p);
+        free(parentv);
+        free(parentw);
+        fgraph_heap_clear(&pq);
+        return r; //should never happen
+    }
+    
+    while(pq->size != 0) {
+        r = fgraph_heap_remove(&pq, &v);
+        if(r != FGRAPH_SUCCESS) {
+            free(p);
+            free(parentv);
+            free(parentw);
+            fgraph_heap_clear(&pq);
+            return r; //should never happen
+        }
+        
+        if(v == to) {
+            //set up us the path
+            r = fgraph_list_init(&path);
+            if(r != FGRAPH_SUCCESS) {
+                free(p);
+                free(parentv);
+                free(parentw);
+                fgraph_heap_clear(&pq);
+                return r;
+            }
+            
+            *rweight = 0;
+            sv = v;
+            while(sv >= 0) {
+                r = fgraph_list_add(&path, sv);
+                if(r != FGRAPH_SUCCESS) {
+                    free(p);
+                    free(parentv);
+                    free(parentw);
+                    fgraph_heap_clear(&pq);
+                    fgraph_list_clear(&path);
+                    return r;
+                }
+                
+                if(sv == from) {
+                    break;
+                }
+                
+                *rweight += parentw[sv];
+                sv = parentv[sv];
+            }
+            
+            if((*rvec) != 0) {
+                r = fgraph_vec_clear(rvec);
+                if(r != FGRAPH_SUCCESS) {
+                    free(p);
+                    free(parentv);
+                    free(parentw);
+                    fgraph_heap_clear(&pq);
+                    fgraph_list_clear(&path);
+                    return r; //should never happen
+                }
+            }
+            
+            r = fgraph_vec_init(rvec, path->size);
+            if(r != FGRAPH_SUCCESS) {
+                free(p);
+                free(parentv);
+                free(parentw);
+                fgraph_heap_clear(&pq);
+                fgraph_list_clear(&path);
+                return r;
+            }
+            
+            for(si = path->size - 1; si > -1; --si) {
+                r = fgraph_list_remove(&path, 0, &sv);
+                if(r != FGRAPH_SUCCESS) {
+                    free(p);
+                    free(parentv);
+                    free(parentw);
+                    fgraph_heap_clear(&pq);
+                    fgraph_list_clear(&path);
+                    return r; //should never happen
+                }
+                
+                r = fgraph_vec_set(rvec, si, sv);
+                if(r != FGRAPH_SUCCESS) {
+                    free(p);
+                    free(parentv);
+                    free(parentw);
+                    fgraph_heap_clear(&pq);
+                    fgraph_list_clear(&path);
+                    return r; //should never happen
+                }
+            }
+            
+            free(p);
+            free(parentv);
+            free(parentw);
+            fgraph_heap_clear(&pq);
+            fgraph_list_clear(&path);
+            
+            return FGRAPH_SUCCESS;
+        }
+        
+        for(e = (*graph)->vtx_to_edge[v]; e != 0; e = e->next) {
+            if(e->weight < 0) {
+                free(p);
+                free(parentv);
+                free(parentw);
+                fgraph_heap_clear(&pq);
+                return FGRAPH_ESIGN;
+            }
+            
+            if(p[e->oid] == ULONG_MAX) {
+                r = fgraph_heap_insert(&pq, e->oid, FGRAPH_EDGE_WEIGHT_MAX);
+                if(r != FGRAPH_SUCCESS) {
+                    free(p);
+                    free(parentv);
+                    free(parentw);
+                    fgraph_heap_clear(&pq);
+                    return r; //should never happen
+                }
+            }
+            
+            if(p[v] + e->weight < p[e->oid]) {
+                p[e->oid] = p[v] + e->weight;
+                r = fgraph_heap_decrease(&pq, e->oid, p[e->oid]);
+                if(r != FGRAPH_SUCCESS) {
+                    free(p);
+                    free(parentv);
+                    free(parentw);
+                    fgraph_heap_clear(&pq);
+                    return r; //should never happen
+                }
+                parentv[e->oid] = v;
+                parentw[e->oid] = e->weight;
+            }
+        }
+    }
+    
+    //pq empty before reaching to, i.e., no path
+    free(p);
+    free(parentv);
+    free(parentw);
+    fgraph_heap_clear(&pq);
+    
+    return FGRAPH_ENOPATH;
 }
 
 /* sort operations */

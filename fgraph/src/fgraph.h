@@ -29,7 +29,11 @@ enum fgraph_return_t {
     FGRAPH_EPARALLEL   = 512, //parallel edge not allowed
     FGRAPH_ENOTADAG    = 1024, //graph wasn't a dag
     FGRAPH_EUNKNOWN    = 2048, //don't know what caused the error
-    FGRAPH_ENOPATH     = 4096 //no path between vertexes
+    FGRAPH_ENOPATH     = 4096, //no path between vertexes
+    FGRAPH_EEXISTS     = 8192, //element exists and may not be updated
+    FGRAPH_EEMPTY      = 16384, //empty data structure
+    FGRAPH_EORDER      = 32768, //violation of some ordering constraint (e.g. >)
+    FGRAPH_ESIGN       = 65536 //bad sign, ie a negative number where not expected
 };
 
 typedef enum fgraph_return_t fgraph_return_t;
@@ -37,6 +41,7 @@ typedef enum fgraph_return_t fgraph_return_t;
 /* fgraph types */
 typedef long fgraph_edge_weight_t;
 #define FGRAPH_EDGE_WEIGHT_MAX LONG_MAX
+#define FGRAPH_EDGE_WEIGHT_MIN LONG_MIN
 
 struct fgraph_edge_t {
     struct fgraph_edge_t *next;
@@ -85,6 +90,14 @@ struct fgraph_list_t {
 
 typedef struct fgraph_list_t fgraph_list_t;
 
+struct fgraph_heap_t {
+    unsigned long n, size;
+    long *pq, *qp;
+    fgraph_edge_weight_t *pri;
+};
+
+typedef struct fgraph_heap_t fgraph_heap_t;
+
 /* initialization and destruction */
 fgraph_return_t fgraph_init(fgraph_t **graph, unsigned long size, fgraph_option_t options);
 fgraph_return_t fgraph_clear(fgraph_t **graph);
@@ -109,6 +122,19 @@ fgraph_return_t fgraph_list_get(fgraph_list_t **list, unsigned long idx, long *r
 fgraph_return_t fgraph_list_set(fgraph_list_t **list, unsigned long idx, long value);
 fgraph_return_t fgraph_list_size(fgraph_list_t **list, unsigned long *rvalue);
 
+/* heaps */
+fgraph_return_t fgraph_heap_init(fgraph_heap_t **heap, unsigned long size);
+fgraph_return_t fgraph_heap_clear(fgraph_heap_t **heap);
+fgraph_return_t fgraph_heap_insert(fgraph_heap_t **heap, unsigned long key, fgraph_edge_weight_t value);
+fgraph_return_t fgraph_heap_remove(fgraph_heap_t **heap, unsigned long *rkey);
+fgraph_return_t fgraph_heap_decrease(fgraph_heap_t **heap, unsigned long key, fgraph_edge_weight_t value);
+fgraph_return_t fgraph_heap_size(fgraph_heap_t **heap, unsigned long *rsize);
+fgraph_return_t fgraph_heap_max(fgraph_heap_t **heap, unsigned long *rmax);
+fgraph_return_t fgraph_heap_swim(fgraph_heap_t **heap, unsigned long i);
+fgraph_return_t fgraph_heap_sink(fgraph_heap_t **heap, unsigned long i);
+fgraph_return_t fgraph_heap_more(fgraph_heap_t **heap, unsigned long i, unsigned long j, int *res);
+fgraph_return_t fgraph_heap_swap(fgraph_heap_t **heap, unsigned long i, unsigned long j);
+
 /* edge operations */
 fgraph_return_t fgraph_edge_add(fgraph_t **graph, unsigned long from, unsigned long to, fgraph_edge_weight_t weight);
 fgraph_return_t fgraph_edge_count_all(fgraph_t **graph, unsigned long *rvalue);
@@ -116,6 +142,7 @@ fgraph_return_t fgraph_edge_count(fgraph_t **graph, unsigned long vtx, unsigned 
 
 /* shortest path operations */
 fgraph_return_t fgraph_sp_dag(fgraph_t **graph, unsigned long from, unsigned long to, fgraph_vec_t **rvec, fgraph_edge_weight_t *rweight);
+fgraph_return_t fgraph_sp_dijkstra(fgraph_t **graph, unsigned long from, unsigned long to, fgraph_vec_t **rvec, fgraph_edge_weight_t *rweight);
 
 /* sort operations */
 fgraph_return_t fgraph_sort_topological(fgraph_t **graph, fgraph_vec_t **rvec);
