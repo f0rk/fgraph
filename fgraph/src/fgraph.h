@@ -143,6 +143,7 @@ fgraph_return_t fgraph_edge_count(fgraph_t **graph, unsigned long vtx, unsigned 
 /* shortest path operations */
 fgraph_return_t fgraph_sp_dag(fgraph_t **graph, unsigned long from, unsigned long to, fgraph_vec_t **rvec, fgraph_edge_weight_t *rweight);
 fgraph_return_t fgraph_sp_dijkstra(fgraph_t **graph, unsigned long from, unsigned long to, fgraph_vec_t **rvec, fgraph_edge_weight_t *rweight);
+fgraph_return_t fgraph_sp_bfs(fgraph_t **graph, unsigned long from, unsigned long to, fgraph_vec_t **rvec);
 
 /* sort operations */
 fgraph_return_t fgraph_sort_topological(fgraph_t **graph, fgraph_vec_t **rvec);

@@ -274,5 +274,36 @@ int main() {
     printf("vec_clear returns %d\n", fgraph_vec_clear(&rvec));
     printf("fgraph_clear returns %d\n", fgraph_clear(&graph));
     
+    res = fgraph_init(&graph, 10, FGRAPH_ODEFAULT);
+    printf("fgraph_init returned %d\n", res);
+    
+    printf("edge_add returned %d\n", fgraph_edge_add(&graph, 0, 2, 4));
+    printf("edge_add returned %d\n", fgraph_edge_add(&graph, 0, 3, 1));
+    printf("edge_add returned %d\n", fgraph_edge_add(&graph, 1, 3, 6));
+    printf("edge_add returned %d\n", fgraph_edge_add(&graph, 1, 4, 1));
+    printf("edge_add returned %d\n", fgraph_edge_add(&graph, 2, 5, 2));
+    printf("edge_add returned %d\n", fgraph_edge_add(&graph, 3, 4, 1));
+    printf("edge_add returned %d\n", fgraph_edge_add(&graph, 3, 5, 1));
+    printf("edge_add returned %d\n", fgraph_edge_add(&graph, 3, 6, 2));
+    printf("edge_add returned %d\n", fgraph_edge_add(&graph, 4, 7, 1));
+    printf("edge_add returned %d\n", fgraph_edge_add(&graph, 5, 8, 1));
+    printf("edge_add returned %d\n", fgraph_edge_add(&graph, 6, 7, 6));
+    printf("edge_add returned %d\n", fgraph_edge_add(&graph, 6, 9, 2));
+    printf("edge_add returned %d\n", fgraph_edge_add(&graph, 8, 9, 1));
+    printf("edge_add returned %d\n", fgraph_edge_add(&graph, 9, 7, 2));
+    res = fgraph_sp_bfs(&graph, 3, 9, &rvec);
+    printf("sp_bfs returns %d\n", res);
+    
+    res = fgraph_vec_size(&rvec, &ures);
+    printf("vec_size returns %d\n", res);
+    printf("vec_size is %d\n", ures);
+    for(i = 0; i < ures; ++i) {
+        fgraph_vec_get(&rvec, i, &res);
+        printf("vec[%d] is %d\n", i, res);
+    }
+    
+    printf("vec_clear returns %d\n", fgraph_vec_clear(&rvec));
+    printf("fgraph_clear returns %d\n", fgraph_clear(&graph));
+    
     return 0;
 }

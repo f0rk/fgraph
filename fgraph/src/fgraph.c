@@ -688,12 +688,14 @@ fgraph_return_t fgraph_edge_add(fgraph_t **graph, unsigned long from, unsigned l
     ++((*graph)->ecnt);
     
     if(!(((*graph)->options & FGRAPH_ODIRECTED) == FGRAPH_ODIRECTED)) { //not directed, add the edge in the other direction
+        ne = 0;
         ne = (fgraph_edge_t*)malloc(sizeof(fgraph_edge_t));
         if(ne == 0) {
             return FGRAPH_ENOMEM;
         }
         ne->oid = from;
         ne->weight = weight;
+        ne->next = 0;
         
         if((*graph)->vtx_to_edge[to] != 0) {
             ne->next = (*graph)->vtx_to_edge[to];
@@ -1136,6 +1138,161 @@ fgraph_return_t fgraph_sp_dijkstra(fgraph_t **graph, unsigned long from, unsigne
     free(parentv);
     free(parentw);
     fgraph_heap_clear(&pq);
+    
+    return FGRAPH_ENOPATH;
+}
+
+fgraph_return_t fgraph_sp_bfs(fgraph_t **graph, unsigned long from, unsigned long to, fgraph_vec_t **rvec) {
+    unsigned long *p = 0;
+    short *visited = 0;
+    fgraph_list_t *queue = 0, *path = 0;
+    long i = 0, r = 0, v = 0;
+    fgraph_edge_t *e = 0;
+    
+    if((*graph) == 0) {
+        return FGRAPH_ENULL;
+    }
+    
+    if(from >= (*graph)->size || to >= (*graph)->size) {
+        return FGRAPH_EBOUNDS;
+    }
+    
+    p = (unsigned long*)malloc(sizeof(unsigned long)*((*graph)->size));
+    if(p == 0) {
+        return FGRAPH_ENOMEM;
+    }
+    
+    for(i = 0; i < (*graph)->size; ++i) {
+        p[i] = -1;
+    }
+    
+    visited = (short*)malloc(sizeof(short)*((*graph)->size));
+    if(visited == 0) {
+        free(p);
+        return FGRAPH_ENOMEM;
+    }
+    
+    for(i = 0; i < (*graph)->size; ++i) {
+        visited[i] = 0;
+    }
+    
+    r = fgraph_list_init(&queue);
+    if(r != FGRAPH_SUCCESS) {
+        free(p);
+        free(visited);
+        return r;
+    }
+    
+    r = fgraph_list_add(&queue, from);
+    if(r != FGRAPH_SUCCESS) {
+        free(p);
+        free(visited);
+        fgraph_list_clear(&queue);
+        return r;
+    }
+    
+    while(queue->size != 0) {
+        r = fgraph_list_remove(&queue, 0, &v);
+        if(r != FGRAPH_SUCCESS) {
+            free(p);
+            free(visited);
+            fgraph_list_clear(&queue);
+            return r; //should never happen
+        }
+        
+        if(v == to) {
+            //set up us the path
+            r = fgraph_list_init(&path);
+            if(r != FGRAPH_SUCCESS) {
+                free(p);
+                free(visited);
+                fgraph_list_clear(&queue);
+                return r; 
+            }
+            
+            while(v > -1) {
+                r = fgraph_list_add(&path, v);
+                if(r != FGRAPH_SUCCESS) {
+                    free(p);
+                    free(visited);
+                    fgraph_list_clear(&queue);
+                    fgraph_list_clear(&path);
+                    return r;
+                }
+                
+                if(v == from) {
+                    break;
+                }
+                
+                v = p[v];
+            }
+            
+            if((*rvec) != 0) {
+                r = fgraph_vec_clear(rvec);
+                if(r != FGRAPH_SUCCESS) {
+                    free(p);
+                    free(visited);
+                    fgraph_list_clear(&queue);
+                    fgraph_list_clear(&path);
+                    return r; //should never happen
+                }
+            }
+            
+            r = fgraph_vec_init(rvec, path->size);
+            if(r != FGRAPH_SUCCESS) {
+                free(p);
+                free(visited);
+                fgraph_list_clear(&queue);
+                fgraph_list_clear(&path);
+                return r;
+            }
+            
+            for(i = path->size - 1; i > -1; --i) {
+                r = fgraph_list_remove(&path, 0, &v);
+                if(r != FGRAPH_SUCCESS) {
+                    free(p);
+                    free(visited);
+                    fgraph_list_clear(&queue);
+                    fgraph_list_clear(&path);
+                    return r; //should never happen
+                }
+                
+                r = fgraph_vec_set(rvec, i, v);
+                if(r != FGRAPH_SUCCESS) {
+                    free(p);
+                    free(visited);
+                    fgraph_list_clear(&queue);
+                    fgraph_list_clear(&path);
+                    return r; //should never happen
+                }
+            }
+            
+            free(p);
+            free(visited);
+            fgraph_list_clear(&queue);
+            fgraph_list_clear(&path);
+            
+            return FGRAPH_SUCCESS;
+        }
+        
+        for(e = (*graph)->vtx_to_edge[v]; e != 0; e = e->next) {
+            if(visited[e->oid] == 0) {
+                p[e->oid] = v;
+                r = fgraph_list_add(&queue, e->oid);
+                if(r != FGRAPH_SUCCESS) {
+                    free(p);
+                    free(visited);
+                    fgraph_list_clear(&queue);
+                    return r;
+                }
+                visited[e->oid] = 1;
+            }
+        }
+    }
+    
+    free(p);
+    free(visited);
+    fgraph_list_clear(&queue);
     
     return FGRAPH_ENOPATH;
 }
