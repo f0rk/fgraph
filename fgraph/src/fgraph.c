@@ -466,6 +466,10 @@ fgraph_return_t fgraph_heap_insert(fgraph_heap_t **heap, unsigned long key, fgra
         return FGRAPH_ENULL;
     }
     
+    if((*heap)->size <= key) {
+        return FGRAPH_EBOUNDS;
+    }
+    
     if((*heap)->pri[key] != FGRAPH_EDGE_WEIGHT_MIN) {
         return FGRAPH_EEXISTS;
     }
@@ -494,7 +498,7 @@ fgraph_return_t fgraph_heap_remove(fgraph_heap_t **heap, unsigned long *rkey) {
     }
     
     if((*heap)->n == 0) {
-        *rkey = -1;
+        *rkey = 0;
         return FGRAPH_EEMPTY;
     }
     
@@ -517,6 +521,10 @@ fgraph_return_t fgraph_heap_decrease(fgraph_heap_t **heap, unsigned long key, fg
     
     if((*heap) == 0) {
         return FGRAPH_ENULL;
+    }
+    
+    if((*heap)->size <= key) {
+        return FGRAPH_EBOUNDS;
     }
     
     if((*heap)->pri[key] < value) {
