@@ -132,7 +132,7 @@ fgraph_return_t fgraph_heap_size(fgraph_heap_t **heap, unsigned long *rsize);
 fgraph_return_t fgraph_heap_max(fgraph_heap_t **heap, unsigned long *rmax);
 fgraph_return_t fgraph_heap_swim(fgraph_heap_t **heap, unsigned long i);
 fgraph_return_t fgraph_heap_sink(fgraph_heap_t **heap, unsigned long i);
-fgraph_return_t fgraph_heap_more(fgraph_heap_t **heap, unsigned long i, unsigned long j, int *res);
+fgraph_return_t fgraph_heap_more(fgraph_heap_t **heap, unsigned long i, unsigned long j, int *rbool);
 fgraph_return_t fgraph_heap_swap(fgraph_heap_t **heap, unsigned long i, unsigned long j);
 
 /* edge operations */
@@ -148,5 +148,8 @@ fgraph_return_t fgraph_sp_bfs(fgraph_t **graph, unsigned long from, unsigned lon
 /* sort operations */
 fgraph_return_t fgraph_sort_topological(fgraph_t **graph, fgraph_vec_t **rvec);
 
-/* coloring */
-//TODO
+/* coloring operations */
+fgraph_return_t fgraph_color_is_kcolorable_bf(fgraph_t **graph, long ncolors, int *rbool);
+fgraph_return_t fgraph_color_is_kcolorable(fgraph_t **graph, long ncolors, int *rbool);
+fgraph_return_t fgraph_color_kcoloring_bf(fgraph_t **graph, long ncolors, fgraph_vec_t **rvec);
+fgraph_return_t fgraph_color_kcoloring(fgraph_t **graph, long ncolors, fgraph_vec_t **rvec);

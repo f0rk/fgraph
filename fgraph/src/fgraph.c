@@ -227,6 +227,7 @@ fgraph_return_t fgraph_list_clear(fgraph_list_t **list) {
     }
     
     free(*list);
+    *list = 0;
     
     return FGRAPH_SUCCESS;
 }
@@ -348,7 +349,8 @@ fgraph_return_t fgraph_list_get(fgraph_list_t **list, unsigned long idx, long *r
 }
 
 fgraph_return_t fgraph_list_set(fgraph_list_t **list, unsigned long idx, long value) {
-    fgraph_node_t *n; unsigned long i;
+    fgraph_node_t *n = 0;
+    unsigned long i = 0;
     
     if((*list) == 0) {
         return FGRAPH_ENULL;
@@ -624,16 +626,16 @@ fgraph_return_t fgraph_heap_sink(fgraph_heap_t **heap, unsigned long i) {
     return FGRAPH_SUCCESS;
 }
 
-fgraph_return_t fgraph_heap_more(fgraph_heap_t **heap, unsigned long i, unsigned long j, int *res) {
+fgraph_return_t fgraph_heap_more(fgraph_heap_t **heap, unsigned long i, unsigned long j, int *rbool) {
     if((*heap) == 0) {
         return FGRAPH_ENULL;
     }
     
-    if(res == 0) {
+    if(rbool == 0) {
         return FGRAPH_ENULL;
     }
     
-    *res = ((*heap)->pri[(*heap)->pq[i]]) > ((*heap)->pri[(*heap)->pq[j]]);
+    *rbool = ((*heap)->pri[(*heap)->pq[i]]) > ((*heap)->pri[(*heap)->pq[j]]);
     
     return FGRAPH_SUCCESS;
 }
@@ -1424,4 +1426,18 @@ fgraph_return_t fgraph_sort_topological(fgraph_t **graph, fgraph_vec_t **rvec) {
 }
 
 /* coloring operations */
-//TODO
+fgraph_return_t fgraph_color_is_kcolorable_bf(fgraph_t **graph, long ncolors, int *rbool) {
+    return FGRAPH_EUNSUP; //TODO: Implement
+}
+
+fgraph_return_t fgraph_color_is_kcolorable(fgraph_t **graph, long ncolors, int *rbool) {
+    return FGRAPH_EUNSUP; //TODO: Implement
+}
+
+fgraph_return_t fgraph_color_kcoloring_bf(fgraph_t **graph, long ncolors, fgraph_vec_t **rvec) {
+    return FGRAPH_EUNSUP; //TODO: Implement
+}
+
+fgraph_return_t fgraph_color_kcoloring(fgraph_t **graph, long ncolors, fgraph_vec_t **rvec) {
+    return FGRAPH_EUNSUP; //TODO: Implement
+}

@@ -1,0 +1,11 @@
+{
+    "config": {
+        "name": "fgraph",
+        "version": "0.20",
+        "abstract": "C graph routines",
+        "author": "Ryan P. Kelly <rpkelly@cpan.org>",
+        "license": "MIT",
+        "copyright_holder": "Ryan P. Kelly",
+        "repository": "http://github.com/f0rk/fgraph"
+    }
+}
