@@ -190,8 +190,118 @@ fgraph_return_t fgraph_vec_size(fgraph_vec_t **vec, unsigned long *rvalue) {
     return FGRAPH_SUCCESS;
 }
 
-/* stack operations */
-//TODO
+/* stacks */
+fgraph_return_t fgraph_stack_init(fgraph_stack_t **stack) {
+    if((*stack) != 0) {
+        return FGRAPH_EINITED;
+    }
+    
+    *stack = (fgraph_stack_t*)malloc(sizeof(fgraph_stack_t));
+    if((*stack) == 0) {
+        return FGRAPH_ENOMEM;
+    }
+    
+    (*stack)->top = 0;
+    (*stack)->size = 0;
+    
+    return FGRAPH_SUCCESS;
+}
+
+fgraph_return_t fgraph_stack_clear(fgraph_stack_t **stack) {
+    fgraph_node_t *n = 0, *t = 0;
+    
+    if((*stack) == 0) {
+        return FGRAPH_ENULL;
+    }
+    
+    if((*stack)->top != 0) {
+        for(n = (*stack)->top; n != 0; n = t) { //walk down the stack
+            t = n->prev;
+            free(n);
+        }
+        (*stack)->top = 0;
+        (*stack)->size = 0;
+    }
+    
+    free(*stack);
+    *stack = 0;
+    
+    return FGRAPH_SUCCESS;
+}
+
+fgraph_return_t fgraph_stack_push(fgraph_stack_t **stack, long value) {
+    fgraph_node_t *nn = 0;
+    
+    if((*stack) == 0) {
+        return FGRAPH_ENULL;
+    }
+    
+    nn = (fgraph_node_t*)malloc(sizeof(fgraph_node_t));
+    if(nn == 0) {
+        return FGRAPH_ENOMEM;
+    }
+    
+    nn->prev = 0;
+    nn->next = 0;
+    nn->val = value;
+    
+    if((*stack)->top == 0) {
+        (*stack)->top = nn;
+        (*stack)->size = 1;
+        return FGRAPH_SUCCESS;
+    }
+    
+    nn->prev = (*stack)->top;
+    (*stack)->top->next = nn;
+    (*stack)->top = nn;
+    
+    return FGRAPH_SUCCESS;
+}
+
+fgraph_return_t fgraph_stack_pop(fgraph_stack_t **stack, long *rvalue) {
+    if((*stack) == 0) {
+        return FGRAPH_ENULL;
+    }
+    
+    if(rvalue == 0) {
+        return FGRAPH_ENULL;
+    }
+    
+    if((*stack)->top == 0) {
+        return FGRAPH_EEMPTY;
+    }
+    
+    *rvalue = (*stack)->top;
+    
+    if((*stack)->top->prev != 0) {
+        (*stack)->top = (*stack)->top->prev;
+        (*stack)->top->next->prev = 0;
+        free((*stack)->top->next);
+        (*stack)->top->next = 0;
+        (*stack)->size--;
+        return FGRAPH_SUCCESS;
+    }
+    
+    free((*stack)->top);
+    (*stack)->top = 0;
+    (*stack)->size = 0;
+    
+    return FGRAPH_SUCCESS;
+}
+
+fgraph_return_t fgraph_stack_size(fgraph_stack_t **stack, unsigned long *rvalue) {
+    if((*stack) == 0) {
+        return FGRAPH_ENULL;
+    }
+    
+    if(rvalue == 0) {
+        return FGRAPH_ENULL;
+    }
+    
+    *rvalue = (*stack)->size;
+    
+    return FGRAPH_SUCCESS;
+}
 
 /* list operations */
 fgraph_return_t fgraph_list_init(fgraph_list_t **list) {
