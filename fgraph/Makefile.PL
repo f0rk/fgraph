@@ -185,8 +185,10 @@ sub install {
 
 sub clean {
     #rm -rf build
-    print "rm -rf build\n";
-    rmtree('build');
+    if(-e 'build') {
+        print "rm -rf build\n";
+        rmtree('build');
+    }
     
     my $cfg = read_config();
     if(defined($cfg->{'config'}->{'name'}) && defined($cfg->{'config'}->{'version'})) {
