@@ -4,9 +4,9 @@
 int main() {
     fgraph_heap_t *heap = 0;
     fgraph_return_t res = 0;
-    unsigned long ulval = 0;
+    unsigned long ulval = 0, *pulval = 0;
     
-    tap_plan(43);
+    tap_plan(46);
     
     res = fgraph_heap_init(&heap, 10);
     tap_ok(res == FGRAPH_SUCCESS, "heap inited ok");
@@ -110,6 +110,15 @@ int main() {
     
     res = fgraph_heap_remove(&heap, &ulval);
     tap_ok(res == FGRAPH_EEMPTY, "heap is empty");
+    
+    res = fgraph_heap_max(&heap, pulval);
+    tap_ok(res == FGRAPH_ENULL, "pulval is null");
+    
+    res = fgraph_heap_remove(&heap, pulval);
+    tap_ok(res == FGRAPH_ENULL, "pulval is null");
+    
+    res = fgraph_heap_size(&heap, pulval);
+    tap_ok(res == FGRAPH_ENULL, "pulval is null");
     
     res = fgraph_heap_clear(&heap);
     tap_ok(res == FGRAPH_SUCCESS, "cleared ok");
