@@ -123,7 +123,7 @@ fgraph_return_t fgraph_list_set(fgraph_list_t **list, unsigned long idx, long va
 fgraph_return_t fgraph_list_size(fgraph_list_t **list, unsigned long *rvalue);
 
 /* heaps */
-fgraph_return_t fgraph_heap_init(fgraph_heap_t **heap, unsigned long size);
+fgraph_return_t fgraph_heap_init(fgraph_heap_t **heap, unsigned long max);
 fgraph_return_t fgraph_heap_clear(fgraph_heap_t **heap);
 fgraph_return_t fgraph_heap_insert(fgraph_heap_t **heap, unsigned long key, fgraph_edge_weight_t value);
 fgraph_return_t fgraph_heap_remove(fgraph_heap_t **heap, unsigned long *rkey);

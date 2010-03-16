@@ -8,11 +8,14 @@ int main() {
     unsigned long ulval = 0;
     long lval = 0;
     
-    tap_plan(25);
+    tap_plan(46);
     
     res = fgraph_list_init(&list);
     tap_ok(res == FGRAPH_SUCCESS, "list inited ok");
     tap_ok(list != 0, "list not null");
+    
+    res = fgraph_list_init(&list);
+    tap_ok(res == FGRAPH_EINITED, "list already inited");
     
     res = fgraph_list_add(&list, 10);
     tap_ok(res == FGRAPH_SUCCESS, "10 added ok");
@@ -67,6 +70,58 @@ int main() {
     res = fgraph_list_clear(&list);
     tap_ok(res == FGRAPH_SUCCESS, "list cleared ok");
     tap_ok(list == 0, "list is null");
+    
+    res = fgraph_list_add(&list, 2);
+    tap_ok(res == FGRAPH_ENULL, "list is null");
+    
+    res = fgraph_list_get(&list, 2, &lval);
+    tap_ok(res == FGRAPH_ENULL, "list is null");
+    
+    res = fgraph_list_remove(&list, 2, &lval);
+    tap_ok(res == FGRAPH_ENULL, "list is null");
+    
+    res = fgraph_list_set(&list, 2, 2);
+    tap_ok(res == FGRAPH_ENULL, "list is null");
+    
+    res = fgraph_list_size(&list, &ulval);
+    tap_ok(res == FGRAPH_ENULL, "list is null");
+    
+    res = fgraph_list_clear(&list);
+    tap_ok(res == FGRAPH_ENULL, "list is null");
+    
+    res = fgraph_list_init(&list);
+    tap_ok(res == FGRAPH_SUCCESS, "list inited ok");
+    
+    res = fgraph_list_add(&list, 1);
+    tap_ok(res == FGRAPH_SUCCESS, "added ok");
+    
+    res = fgraph_list_add(&list, 2);
+    tap_ok(res == FGRAPH_SUCCESS, "added ok");
+    
+    res = fgraph_list_add(&list, 3);
+    tap_ok(res == FGRAPH_SUCCESS, "added ok");
+    
+    res = fgraph_list_add(&list, 4);
+    tap_ok(res == FGRAPH_SUCCESS, "added ok");
+    
+    res = fgraph_list_remove(&list, 0, &lval);
+    tap_ok(res == FGRAPH_SUCCESS, "value removed ok");
+    tap_ok(lval == 1, "removed elem is 1");
+    
+    res = fgraph_list_remove(&list, 0, &lval);
+    tap_ok(res == FGRAPH_SUCCESS, "value removed ok");
+    tap_ok(lval == 2, "removed elem is 2");
+    
+    res = fgraph_list_remove(&list, 0, &lval);
+    tap_ok(res == FGRAPH_SUCCESS, "value removed ok");
+    tap_ok(lval == 3, "removed elem is 3");
+    
+    res = fgraph_list_remove(&list, 0, &lval);
+    tap_ok(res == FGRAPH_SUCCESS, "value removed ok");
+    tap_ok(lval == 4, "removed elem is 4");
+    
+    res = fgraph_list_remove(&list, 0, &lval);
+    tap_ok(res == FGRAPH_EBOUNDS, "no elem at 0");
     
     return tap_status();
 }

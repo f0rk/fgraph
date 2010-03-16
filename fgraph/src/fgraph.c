@@ -88,6 +88,8 @@ fgraph_return_t fgraph_vec_init_set(fgraph_vec_t **vec, unsigned long size, long
     
     (*vec)->arr = (long*)malloc(sizeof(long)*size);
     if((*vec)->arr == 0) { //no memory
+        free(*vec);
+        *vec = 0;
         return FGRAPH_ENOMEM;
     }
     
@@ -398,20 +400,38 @@ fgraph_return_t fgraph_heap_init(fgraph_heap_t **heap, unsigned long size) {
         return FGRAPH_ENOMEM;
     }
     
-    (*heap)->pq = (long*)malloc(sizeof(long)*size+1);
+    if((*heap)->pq != 0) {
+        free(*heap);
+        *heap = 0;
+        return FGRAPH_EINITED;
+    }
+    
+    if((*heap)->qp != 0) {
+        free(*heap);
+        *heap = 0;
+        return FGRAPH_EINITED;
+    }
+    
+    if((*heap)->pri != 0) {
+        free(*heap);
+        *heap = 0;
+        return FGRAPH_EINITED;
+    }
+    
+    (*heap)->pq = (long*)malloc(sizeof(long)*size);
     if((*heap)->pq == 0) {
         free(*heap);
         return FGRAPH_ENOMEM;
     }
     
-    (*heap)->qp = (long*)malloc(sizeof(long)*size+1);
+    (*heap)->qp = (long*)malloc(sizeof(long)*size);
     if((*heap)->qp == 0) {
         free((*heap)->pq);
         free(*heap);
         return FGRAPH_ENOMEM;
     }
     
-    (*heap)->pri = (fgraph_edge_weight_t*)malloc(sizeof(long)*size+1);
+    (*heap)->pri = (fgraph_edge_weight_t*)malloc(sizeof(fgraph_edge_weight_t)*size);
     if((*heap)->pri == 0) {
         free((*heap)->pq);
         free((*heap)->qp);
@@ -419,7 +439,7 @@ fgraph_return_t fgraph_heap_init(fgraph_heap_t **heap, unsigned long size) {
         return FGRAPH_ENOMEM;
     }
     
-    (*heap)->size = size+1;
+    (*heap)->size = size;
     (*heap)->n = 0;
     
     for(i = 0; i < (*heap)->size; ++i) {
@@ -448,12 +468,18 @@ fgraph_return_t fgraph_heap_clear(fgraph_heap_t **heap) {
     }
     
     free((*heap)->pq);
+    (*heap)->pq = 0;
+    
     free((*heap)->qp);
+    (*heap)->qp = 0;
+    
     free((*heap)->pri);
+    (*heap)->pri = 0;
+    
     (*heap)->size = 0;
     (*heap)->n = 0;
-    free(*heap);
     
+    free(*heap);
     *heap = 0;
     
     return FGRAPH_SUCCESS;
@@ -563,7 +589,7 @@ fgraph_return_t fgraph_heap_max(fgraph_heap_t **heap, unsigned long *rmax) {
         return FGRAPH_ENULL;
     }
     
-    *rmax = (*heap)->size;
+    *rmax = (*heap)->size - 1;
     
     return FGRAPH_SUCCESS;
 }
@@ -1012,7 +1038,7 @@ fgraph_return_t fgraph_sp_dijkstra(fgraph_t **graph, unsigned long from, unsigne
         return r; //should never happen
     }
     
-    while(pq->size != 0) {
+    while(pq->n != 0) {
         r = fgraph_heap_remove(&pq, &v);
         if(r != FGRAPH_SUCCESS) {
             free(p);

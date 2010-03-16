@@ -7,11 +7,14 @@ int main() {
     unsigned long ulval = 0;
     long lval = 0;
     
-    tap_plan(15);
+    tap_plan(20);
     
     res = fgraph_vec_init(&vec, 10);
     tap_ok(res == FGRAPH_SUCCESS, "vec inited ok");
     tap_ok(vec != 0, "vec not null");
+    
+    res = fgraph_vec_init(&vec, 20);
+    tap_ok(res == FGRAPH_EINITED, "vec already inited");
     
     res = fgraph_vec_size(&vec, &ulval);
     tap_ok(res == FGRAPH_SUCCESS, "size retrieved ok");
@@ -39,6 +42,18 @@ int main() {
     res = fgraph_vec_clear(&vec);
     tap_ok(res == FGRAPH_SUCCESS, "vec cleared ok");
     tap_ok(vec == 0, "vec set to null");
+    
+    res = fgraph_vec_get(&vec, 2, &lval);
+    tap_ok(res == FGRAPH_ENULL, "vec is null");
+    
+    res = fgraph_vec_set(&vec, 2, 10);
+    tap_ok(res == FGRAPH_ENULL, "vec is null");
+    
+    res = fgraph_vec_size(&vec, &ulval);
+    tap_ok(res == FGRAPH_ENULL, "vec is null");
+    
+    res = fgraph_vec_clear(&vec);
+    tap_ok(res == FGRAPH_ENULL, "vec is null");
     
     return tap_status();
 }
