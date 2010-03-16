@@ -4,10 +4,10 @@
 int main() {
     fgraph_vec_t *vec = 0;
     fgraph_return_t res = 0;
-    unsigned long ulval = 0;
-    long lval = 0;
+    unsigned long ulval = 0, *pulval = 0;
+    long lval = 0, *plval = 0;
     
-    tap_plan(20);
+    tap_plan(22);
     
     res = fgraph_vec_init(&vec, 10);
     tap_ok(res == FGRAPH_SUCCESS, "vec inited ok");
@@ -38,6 +38,12 @@ int main() {
     res = fgraph_vec_get(&vec, 2, &lval);
     tap_ok(res == FGRAPH_SUCCESS, "vec get ok");
     tap_ok(lval == -2, "vec[2] is -2");
+    
+    res = fgraph_vec_get(&vec, 2, plval);
+    tap_ok(res == FGRAPH_ENULL, "plval is null");
+    
+    res = fgraph_vec_size(&vec, pulval);
+    tap_ok(res == FGRAPH_ENULL, "pulval is null");
     
     res = fgraph_vec_clear(&vec);
     tap_ok(res == FGRAPH_SUCCESS, "vec cleared ok");

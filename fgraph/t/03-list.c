@@ -5,10 +5,10 @@
 int main() {
     fgraph_list_t *list = 0;
     fgraph_return_t res = 0;
-    unsigned long ulval = 0;
-    long lval = 0;
+    unsigned long ulval = 0, *pulval = 0;
+    long lval = 0, *plval = 0;
     
-    tap_plan(46);
+    tap_plan(52);
     
     res = fgraph_list_init(&list);
     tap_ok(res == FGRAPH_SUCCESS, "list inited ok");
@@ -58,6 +58,9 @@ int main() {
     
     res = fgraph_list_set(&list, 1, -100);
     tap_ok(res == FGRAPH_SUCCESS, "set list idx 1 to -100");
+    
+    res = fgraph_list_set(&list, 100, -100);
+    tap_ok(res == FGRAPH_EBOUNDS, "no such elem 100");
     
     res = fgraph_list_get(&list, 1, &lval);
     tap_ok(res == FGRAPH_SUCCESS, "got elem at idx 1 ok");
@@ -122,6 +125,19 @@ int main() {
     
     res = fgraph_list_remove(&list, 0, &lval);
     tap_ok(res == FGRAPH_EBOUNDS, "no elem at 0");
+    
+    res = fgraph_list_remove(&list, 0, plval);
+    tap_ok(res == FGRAPH_ENULL, "plval is null");
+    
+    res = fgraph_list_size(&list, pulval);
+    tap_ok(res == FGRAPH_ENULL, "pulval is null");
+    
+    res = fgraph_list_get(&list, 1, plval);
+    tap_ok(res == FGRAPH_ENULL, "plval is null");
+    
+    res = fgraph_list_clear(&list);
+    tap_ok(res == FGRAPH_SUCCESS, "list cleared ok");
+    tap_ok(list == 0, "list is null");
     
     return tap_status();
 }
