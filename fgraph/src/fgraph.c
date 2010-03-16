@@ -245,6 +245,8 @@ fgraph_return_t fgraph_stack_push(fgraph_stack_t **stack, long value) {
     nn->next = 0;
     nn->val = value;
     
+    (*stack)->size++;
+    
     if((*stack)->top == 0) {
         (*stack)->top = nn;
         (*stack)->size = 1;
@@ -271,7 +273,7 @@ fgraph_return_t fgraph_stack_pop(fgraph_stack_t **stack, long *rvalue) {
         return FGRAPH_EEMPTY;
     }
     
-    *rvalue = (*stack)->top;
+    *rvalue = (*stack)->top->val;
     
     if((*stack)->top->prev != 0) {
         (*stack)->top = (*stack)->top->prev;

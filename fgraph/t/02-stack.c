@@ -4,10 +4,10 @@
 int main() {
     fgraph_stack_t *stack = 0;
     fgraph_return_t res = 0;
-    unsigned long ulval = 0;
-    long lval = 0;
+    unsigned long ulval = 0, *pulval = 0;
+    long lval = 0, *plval = 0;
     
-    tap_plan(0);
+    tap_plan(32);
     
     res = fgraph_stack_init(&stack);
     tap_ok(res == FGRAPH_SUCCESS, "inited ok");
@@ -77,13 +77,10 @@ int main() {
     tap_ok(res == FGRAPH_SUCCESS, "returned size ok");
     tap_ok(ulval == 2, "size is 2");
     
-    *lval = 0;
-    *ulval = 0;
-    
-    res = fgraph_stack_pop(&stack, &lval);
+    res = fgraph_stack_pop(&stack, plval);
     tap_ok(res == FGRAPH_ENULL, "lval is null");
     
-    res = fgraph_stack_size(&stack, &ulval);
+    res = fgraph_stack_size(&stack, pulval);
     tap_ok(res == FGRAPH_ENULL, "ulval is null");
     
     res = fgraph_stack_clear(&stack);
