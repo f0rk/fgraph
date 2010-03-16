@@ -34,7 +34,7 @@ int main() {
     fgraph_edge_add(&graph, 3, 7, 1);
     fgraph_edge_add(&graph, 4, 5, 2);
     fgraph_edge_add(&graph, 4, 6, 6);
-    fgraph_edge_add(&graph, 5, 7, 3);
+    fgraph_edge_add(&graph, 5, 7, 4);
     fgraph_edge_add(&graph, 6, 7, 2);
     
     /*
