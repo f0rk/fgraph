@@ -190,6 +190,23 @@ fgraph_return_t fgraph_vec_size(fgraph_vec_t **vec, unsigned long *rvalue) {
     return FGRAPH_SUCCESS;
 }
 
+fgraph_return_t fgraph_vec_length(fgraph_vec_t **vec, unsigned long *rvalue) {
+    if(*vec == 0) { //null pointer
+        return FGRAPH_ENULL;
+    }
+    
+    if((*vec)->arr == 0) { //null pointer
+        return FGRAPH_ENULL;
+    }
+    
+    if(rvalue == 0) { //null pointer
+        return FGRAPH_ENULL;
+    }
+    
+    *rvalue = (*vec)->size - 1;
+    return FGRAPH_SUCCESS;
+}
+
 /* stacks */
 fgraph_return_t fgraph_stack_init(fgraph_stack_t **stack) {
     if((*stack) != 0) {

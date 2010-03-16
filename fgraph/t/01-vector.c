@@ -7,7 +7,7 @@ int main() {
     unsigned long ulval = 0, *pulval = 0;
     long lval = 0, *plval = 0;
     
-    tap_plan(22);
+    tap_plan(24);
     
     res = fgraph_vec_init(&vec, 10);
     tap_ok(res == FGRAPH_SUCCESS, "vec inited ok");
@@ -19,6 +19,10 @@ int main() {
     res = fgraph_vec_size(&vec, &ulval);
     tap_ok(res == FGRAPH_SUCCESS, "size retrieved ok");
     tap_ok(ulval == 10, "vec is of size 10");
+    
+    res = fgraph_vec_length(&vec, &ulval);
+    tap_ok(res == FGRAPH_SUCCESS, "length retrieved ok");
+    tap_ok(ulval == 9, "vec is of length 9");
     
     res = fgraph_vec_set(&vec, 0, 12);
     tap_ok(res == FGRAPH_SUCCESS, "vec set ok");

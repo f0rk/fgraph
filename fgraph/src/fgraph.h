@@ -109,6 +109,7 @@ fgraph_return_t fgraph_vec_clear(fgraph_vec_t **vec);
 fgraph_return_t fgraph_vec_get(fgraph_vec_t **vec, unsigned long index, long *rvalue);
 fgraph_return_t fgraph_vec_set(fgraph_vec_t **vec, unsigned long index, long value);
 fgraph_return_t fgraph_vec_size(fgraph_vec_t **vec, unsigned long *rvalue);
+fgraph_return_t fgraph_vec_length(fgraph_vec_t **vec, unsigned long *rvalue);
 
 /* stacks */
 fgraph_return_t fgraph_stack_init(fgraph_stack_t **stack);
