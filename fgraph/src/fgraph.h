@@ -102,6 +102,10 @@ typedef struct fgraph_heap_t fgraph_heap_t;
 fgraph_return_t fgraph_init(fgraph_t **graph, unsigned long size, fgraph_option_t options);
 fgraph_return_t fgraph_clear(fgraph_t **graph);
 
+/* basic graph information */
+fgraph_return_t fgraph_size(fgraph_t **graph, unsigned long *rvalue);
+fgraph_return_t fgraph_options(fgraph_t **graph, fgraph_option_t *rvalue);
+
 /* vectors */
 fgraph_return_t fgraph_vec_init(fgraph_vec_t **vec, unsigned long size);
 fgraph_return_t fgraph_vec_init_set(fgraph_vec_t **vec, unsigned long size, long value);
@@ -142,8 +146,12 @@ fgraph_return_t fgraph_heap_swap(fgraph_heap_t **heap, unsigned long i, unsigned
 
 /* edge operations */
 fgraph_return_t fgraph_edge_add(fgraph_t **graph, unsigned long from, unsigned long to, fgraph_edge_weight_t weight);
+fgraph_return_t fgraph_edge_remove(fgraph_t **graph, unsigned long from, unsigned long to);
 fgraph_return_t fgraph_edge_count_all(fgraph_t **graph, unsigned long *rvalue);
 fgraph_return_t fgraph_edge_count(fgraph_t **graph, unsigned long vtx, unsigned long *rvalue);
+fgraph_return_t fgraph_edge_get_weight(fgraph_t **graph, unsigned long from, unsigned long to, fgraph_edge_weight_t *rvalue);
+fgraph_return_t fgraph_edge_set_weight(fgraph_t **graph, unsigned long from, unsigned long to, fgraph_edge_weight_t weight);
+fgraph_return_t fgraph_edge_exists(fgraph_t **graph, unsigned long from, unsigned long to, int *rbool);
 
 /* shortest path operations */
 fgraph_return_t fgraph_sp_dag(fgraph_t **graph, unsigned long from, unsigned long to, fgraph_vec_t **rvec, fgraph_edge_weight_t *rweight);

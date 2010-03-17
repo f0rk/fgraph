@@ -6,10 +6,11 @@ int main() {
     fgraph_return_t res = 0;
     unsigned long ulval = 0, *pulval = 0;
     
-    tap_plan(46);
+    tap_plan(48);
     
     res = fgraph_heap_init(&heap, 10);
     tap_ok(res == FGRAPH_SUCCESS, "heap inited ok");
+    tap_ok(heap != 0, "heap not null");
     
     res = fgraph_heap_init(&heap, 20);
     tap_ok(res == FGRAPH_EINITED, "heap already inited");
@@ -76,6 +77,7 @@ int main() {
     
     res = fgraph_heap_init(&heap, 4);
     tap_ok(res == FGRAPH_SUCCESS, "heap inited ok");
+    tap_ok(heap != 0, "heap not null");
     
     res = fgraph_heap_insert(&heap, 0, 32);
     tap_ok(res == FGRAPH_SUCCESS, "inserted (0,32) ok");

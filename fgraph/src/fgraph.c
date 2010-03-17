@@ -69,6 +69,35 @@ fgraph_return_t fgraph_clear(fgraph_t **graph) {
     return FGRAPH_SUCCESS;
 }
 
+/* basic graph information */
+fgraph_return_t fgraph_size(fgraph_t **graph, unsigned long *rvalue) {
+    if((*graph) == 0) {
+        return FGRAPH_ENULL;
+    }
+    
+    if(rvalue == 0) {
+        return FGRAPH_ENULL;
+    }
+    
+    *rvalue = (*graph)->size;
+    
+    return FGRAPH_SUCCESS;
+}
+
+fgraph_return_t fgraph_options(fgraph_t **graph, fgraph_option_t *rvalue) {
+    if((*graph) == 0) {
+        return FGRAPH_ENULL;
+    }
+    
+    if(rvalue == 0) {
+        return FGRAPH_ENULL;
+    }
+    
+    *rvalue = (*graph)->options;
+    
+    return FGRAPH_SUCCESS;
+}
+
 /* vectors */
 fgraph_return_t fgraph_vec_init(fgraph_vec_t **vec, unsigned long size) {
     return fgraph_vec_init_set(vec, size, 0);
@@ -853,6 +882,7 @@ fgraph_return_t fgraph_edge_add(fgraph_t **graph, unsigned long from, unsigned l
     ++((*graph)->ecnt);
     
     if(!(((*graph)->options & FGRAPH_ODIRECTED) == FGRAPH_ODIRECTED)) { //not directed, add the edge in the other direction
+        //return fgraph_edge_add(graph, to, from, weight);
         ne = 0;
         ne = (fgraph_edge_t*)malloc(sizeof(fgraph_edge_t));
         if(ne == 0) {
@@ -873,6 +903,63 @@ fgraph_return_t fgraph_edge_add(fgraph_t **graph, unsigned long from, unsigned l
     return FGRAPH_SUCCESS;
 }
 
+fgraph_return_t fgraph_edge_remove(fgraph_t **graph, unsigned long from, unsigned long to) {
+    fgraph_edge_t *e = 0, *t = 0;
+    
+    if((*graph) == 0) {
+        return FGRAPH_ENULL;
+    }
+    
+    if((*graph)->vtx_to_edge == 0) {
+        return FGRAPH_ENULL;
+    }
+    
+    if(from >= (*graph)->size || to >= (*graph)->size) {
+        return FGRAPH_ENOVTX;
+    }
+    
+    for(e = (*graph)->vtx_to_edge[from]; e != 0; e = e->next) {
+        if(e->oid == to) { //gotcha
+            if(t == 0) {
+                t = e;
+                (*graph)->vtx_to_edge[from] = e->next;
+                e->next = 0;
+                free(e);
+                return FGRAPH_SUCCESS;
+            }
+            
+            t->next = e->next;
+            e->next = 0;
+            free(e);
+            return FGRAPH_SUCCESS;
+        }
+        t = e;
+    }
+    
+    if(!(((*graph)->options & FGRAPH_ODIRECTED) == FGRAPH_ODIRECTED)) { //not directed, remove the edge in the other direction
+        e = 0; t = 0;
+        for(e = (*graph)->vtx_to_edge[to]; e != 0; e = e->next) {
+            if(e->oid == from) { //gotcha
+                if(t == 0) {
+                    t = e;
+                    (*graph)->vtx_to_edge[to] = e->next;
+                    e->next = 0;
+                    free(e);
+                    return FGRAPH_SUCCESS;
+                }
+                
+                t->next = e->next;
+                e->next = 0;
+                free(e);
+                return FGRAPH_SUCCESS;
+            }
+            t = e;
+        }
+    }
+    
+    return FGRAPH_ENOEDGE;
+}
+
 fgraph_return_t fgraph_edge_count_all(fgraph_t **graph, unsigned long *rvalue) {
     if((*graph) == 0) {
         return FGRAPH_ENULL;
@@ -887,7 +974,7 @@ fgraph_return_t fgraph_edge_count_all(fgraph_t **graph, unsigned long *rvalue) {
 }
 
 fgraph_return_t fgraph_edge_count(fgraph_t **graph, unsigned long vtx, unsigned long *rvalue) {
-    fgraph_edge_t *e;
+    fgraph_edge_t *e = 0;
     
     if((*graph) == 0) {
         return FGRAPH_ENULL;
@@ -916,8 +1003,95 @@ fgraph_return_t fgraph_edge_count(fgraph_t **graph, unsigned long vtx, unsigned 
     return FGRAPH_SUCCESS;
 }
 
+fgraph_return_t fgraph_edge_get_weight(fgraph_t **graph, unsigned long from, unsigned long to, fgraph_edge_weight_t *rvalue) {
+    fgraph_edge_t *e = 0;
+    
+    if((*graph) == 0) {
+        return FGRAPH_ENULL;
+    }
+    
+    if((*graph)->vtx_to_edge == 0) {
+        return FGRAPH_ENULL;
+    }
+    
+    if(rvalue == 0) {
+        return FGRAPH_ENULL;
+    }
+    
+    if(from >= (*graph)->size || to >= (*graph)->size) {
+        return FGRAPH_ENOEDGE;
+    }
+    
+    //see if the edge exists
+    for(e = (*graph)->vtx_to_edge[from]; e != 0; e = e->next) {
+        if(e->oid == to) { //found it
+            *rvalue = e->weight;
+            return FGRAPH_SUCCESS;
+        }
+    }
+    
+    return FGRAPH_ENOEDGE;
+}
+
+fgraph_return_t fgraph_edge_set_weight(fgraph_t **graph, unsigned long from, unsigned long to, fgraph_edge_weight_t weight) {
+    fgraph_edge_t *e = 0;
+    
+    if((*graph) == 0) {
+        return FGRAPH_ENULL;
+    }
+    
+    if((*graph)->vtx_to_edge == 0) {
+        return FGRAPH_ENULL;
+    }
+    
+    if(from >= (*graph)->size || to >= (*graph)->size) {
+        return FGRAPH_ENOEDGE;
+    }
+    
+    //see if the edge exists
+    for(e = (*graph)->vtx_to_edge[from]; e != 0; e = e->next) {
+        if(e->oid == to) { //found it
+            e->weight = weight;
+            return FGRAPH_SUCCESS;
+        }
+    }
+    
+    return FGRAPH_ENOEDGE;
+}
+
+fgraph_return_t fgraph_edge_exists(fgraph_t **graph, unsigned long from, unsigned long to, int *rbool) {
+    fgraph_edge_t *e = 0;
+    
+    if((*graph) == 0) {
+        return FGRAPH_ENULL;
+    }
+    
+    if((*graph)->vtx_to_edge == 0) {
+        return FGRAPH_ENULL;
+    }
+    
+    if(rbool == 0) {
+        return FGRAPH_ENULL;
+    }
+    
+    if(from >= (*graph)->size || to >= (*graph)->size) {
+        return FGRAPH_ENOEDGE;
+    }
+    
+    *rbool = 0;
+    
+    //see if the edge exists
+    for(e = (*graph)->vtx_to_edge[from]; e != 0; e = e->next) {
+        if(e->oid == to) { //found it
+            *rbool = 1;
+            return FGRAPH_SUCCESS;
+        }
+    }
+    
+    return FGRAPH_SUCCESS;
+}
+
 /* shortest path operations */
-//rvec will contain the nodes along the shortest path
 fgraph_return_t fgraph_sp_dag(fgraph_t **graph, unsigned long from, unsigned long to, fgraph_vec_t **rvec, fgraph_edge_weight_t *rweight) {
     fgraph_vec_t *st = 0;
     long r = 0, v = 0, *p = 0, j = 0;

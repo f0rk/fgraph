@@ -1,0 +1,90 @@
+* clarify the semantics of fgraph_edge_count and fgraph_edge_count_all
+  on an undirected graph. clarify the semantics of fgraph_edge_count in
+  general, i.e. should it be called fgraph_edge_count when it only returns
+  outgoing edges? 
+
+* reorganize the way vectors work: they should merely be a shell around
+  an array and a variable containing the size of the array. no automatic
+  resizing or anything like that. what follows then:
+  + fgraph_vec_resize(fgraph_vec_t **vec, unsigned long size);
+
+* remove 'fgraph_list_t' and make it into 'fgraph_queue_t' and use it like
+  a lifo queue. what follows then:
+  - fgraph_return_t fgraph_list_init(fgraph_list_t **list);
+  - fgraph_return_t fgraph_list_clear(fgraph_list_t **list);
+  - fgraph_return_t fgraph_list_add(fgraph_list_t **list, long value);
+  - fgraph_return_t fgraph_list_remove(fgraph_list_t **list, unsigned long idx, long *rvalue);
+  - fgraph_return_t fgraph_list_get(fgraph_list_t **list, unsigned long idx, long *rvalue);
+  - fgraph_return_t fgraph_list_set(fgraph_list_t **list, unsigned long idx, long value);
+  - fgraph_return_t fgraph_list_size(fgraph_list_t **list, unsigned long *rvalue);
+  + fgraph_return_t fgraph_queue_init(fgraph_queue_t **queue);
+  + fgraph_return_t fgraph_queue_clear(fgraph_queue_t **queue);
+  + fgraph_return_t fgraph_queue_add(fgraph_queue_t **queue, long value);
+  + fgraph_return_t fgraph_queue_remove(fgraph_queue_t **queue, long *rvalue);
+  + fgraph_return_t fgraph_queue_size(fgraph_queue_t **queue, unsigned long *rvalue);
+
+* change fgraph_heap_t into fgraph_minpq_t because it really is a priority queue and not
+  a heap. maybe implement a heap as well, but not critical. what follows:
+  - fgraph_return_t fgraph_heap_init(fgraph_heap_t **heap, unsigned long max);
+  - fgraph_return_t fgraph_heap_clear(fgraph_heap_t **heap);
+  - fgraph_return_t fgraph_heap_insert(fgraph_heap_t **heap, unsigned long key, fgraph_edge_weight_t value);
+  - fgraph_return_t fgraph_heap_remove(fgraph_heap_t **heap, unsigned long *rkey);
+  - fgraph_return_t fgraph_heap_decrease(fgraph_heap_t **heap, unsigned long key, fgraph_edge_weight_t value);
+  - fgraph_return_t fgraph_heap_size(fgraph_heap_t **heap, unsigned long *rsize);
+  - fgraph_return_t fgraph_heap_max(fgraph_heap_t **heap, unsigned long *rmax);
+  - fgraph_return_t fgraph_heap_swim(fgraph_heap_t **heap, unsigned long i);
+  - fgraph_return_t fgraph_heap_sink(fgraph_heap_t **heap, unsigned long i);
+  - fgraph_return_t fgraph_heap_more(fgraph_heap_t **heap, unsigned long i, unsigned long j, int *rbool);
+  - fgraph_return_t fgraph_heap_swap(fgraph_heap_t **heap, unsigned long i, unsigned long j);
+  + fgraph_return_t fgraph_minpq_init(fgraph_minpq_t **minpq, unsigned long max);
+  + fgraph_return_t fgraph_minpq_clear(fgraph_minpq_t **minpq);
+  + fgraph_return_t fgraph_minpq_insert(fgraph_minpq_t **minpq, unsigned long key, fgraph_edge_weight_t value);
+  + fgraph_return_t fgraph_minpq_remove(fgraph_minpq_t **minpq, unsigned long *rkey);
+  + fgraph_return_t fgraph_minpq_decrease(fgraph_minpq_t **minpq, unsigned long key, fgraph_edge_weight_t value);
+  + fgraph_return_t fgraph_minpq_size(fgraph_minpq_t **minpq, unsigned long *rsize);
+  + fgraph_return_t fgraph_minpq_max(fgraph_minpq_t **minpq, unsigned long *rmax);
+  + fgraph_return_t fgraph_minpq_swim(fgraph_minpq_t **minpq, unsigned long i);
+  + fgraph_return_t fgraph_minpq_sink(fgraph_minpq_t **minpq, unsigned long i);
+  + fgraph_return_t fgraph_minpq_more(fgraph_minpq_t **minpq, unsigned long i, unsigned long j, int *rbool);
+  + fgraph_return_t fgraph_minpq_swap(fgraph_minpq_t **minpq, unsigned long i, unsigned long j);
+
+* add functions to remove duplicate edges in a graph. what follows:
+  + fgraph_return_t fgraph_edge_remove_duplicates(fgraph_t **graph, unsigned long from, unsigned long to); /* maybe simplify instead? */
+  + fgraph_return_t fgraph_edge_remove_duplicates_all(fgraph_t **graph); /* maybe simplify instead? */
+  
+* get rid of fgraph_vec_length. it is inconsistent with the rest of the
+  datastructure interface. what follows:
+  - fgraph_return_t fgraph_vec_length(fgraph_vec_t **vec, unsigned long *rvalue);
+  
+* add copy constructors for basically everything. should they be called copy
+  or clone? what follows:
+  + fgraph_return_t fgraph_copy(fgraph_t **graph, fgraph_t **ograph);
+  + fgraph_return_t fgraph_vec_copy(fgraph_vec_t **vec, fgraph_vec_t **ovec);
+  + fgraph_return_t fgraph_stack_copy(fgraph_stack_t **stack, fgraph_stack_t **ostack);
+  + fgraph_return_t fgraph_list_copy(fgraph_list_t **list, fgraph_list_t **olist); /* may be queue in the future */
+  + fgraph_return_t fgraph_heap_copy(fgraph_heap_t **heap, fgraph_heap_t **oheap); /* may be minpq in the future */
+  
+* add visiting support, such that you traverse a graph and have a callback
+  function for each vertex visited. what follows:
+  + fgraph_return_t fgraph_traverse_bfs(fgraph_t **graph, void (*func)(unsigned long)); /* is void the right return type? */
+  + fgraph_return_t fgraph_traverse_dfs(fgraph_t **graph, void (*func)(unsigned long)); /* is void the right return type? */
+  
+* add transitive closure support. what follows:
+  + fgraph_return_t fgraph_closure_transitive(fgraph_t **graph);
+
+* add support for checking whether two nodes are connected or not. what follows:
+  + fgraph_return_t fgraph_connected_is(fgraph_t **graph, unsigned long from, unsigned long to, int *rbool); /* bad name? */
+
+* add support for getting the size of a graph. what follows:
+  + fgraph_return_t fgraph_size(fgraph_t **graph, unsigned long *rvalue);
+  
+* add support for getting all the neighbors of a vertex. what follows:
+  + fgraph_return_t fgraph_size(fgraph_t **graph, fgraph_vec_t **rvec);
+  
+* rename fgraph_edge_count and fgraph_edge_count_all to fgraph_vertex_degree. what follows:
+  - fgraph_return_t fgraph_edge_count_all(fgraph_t **graph, unsigned long *rvalue);
+  - fgraph_return_t fgraph_edge_count(fgraph_t **graph, unsigned long vtx, unsigned long *rvalue);
+  + fgraph_return_t fgraph_vertex_degree_all(fgraph_t **graph, unsigned long *rvalue);
+  + fgraph_return_t fgraph_vertex_degree(fgraph_t **graph, unsigned long vtx, unsigned long *rvalue);
+  
+

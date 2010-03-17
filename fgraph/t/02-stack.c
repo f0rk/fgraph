@@ -7,10 +7,11 @@ int main() {
     unsigned long ulval = 0, *pulval = 0;
     long lval = 0, *plval = 0;
     
-    tap_plan(32);
+    tap_plan(34);
     
     res = fgraph_stack_init(&stack);
     tap_ok(res == FGRAPH_SUCCESS, "inited ok");
+    tap_ok(stack != 0, "stack not null");
     
     res = fgraph_stack_push(&stack, 30);
     tap_ok(res == FGRAPH_SUCCESS, "pushed ok");
@@ -55,6 +56,7 @@ int main() {
     
     res = fgraph_stack_init(&stack);
     tap_ok(res == FGRAPH_SUCCESS, "inited ok");
+    tap_ok(stack != 0, "stack not null");
     
     res = fgraph_stack_push(&stack, 1);
     tap_ok(res == FGRAPH_SUCCESS, "pushed ok");
