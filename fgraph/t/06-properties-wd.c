@@ -1,6 +1,8 @@
 #include <tap.h>
 #include "fgraph.h"
 
+/* weighted + directed */
+
 int main() {
     fgraph_t *graph = 0;
     fgraph_return_t res = 0;
@@ -10,8 +12,6 @@ int main() {
     int ival = 0, *pival = 0;
     
     tap_plan(50);
-    
-    /* weighted + directed */
     
     res = fgraph_init(&graph, 8, FGRAPH_OWEIGHTED|FGRAPH_ODIRECTED);
     tap_ok(res == FGRAPH_SUCCESS, "inited ok");
@@ -138,12 +138,6 @@ int main() {
     res = fgraph_edge_exists(&graph, 2, 4, &ival);
     tap_ok(res == FGRAPH_SUCCESS, "checked for edge ok");
     tap_ok(!ival, "edge does not exist");
-    
-    /* weighted + undirected */
-    
-    /* unweighted + directed */
-    
-    /* unweighted + undirected */
     
     return tap_status();
 }
