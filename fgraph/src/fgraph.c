@@ -1301,7 +1301,7 @@ fgraph_return_t fgraph_sp_dijkstra(fgraph_t **graph, unsigned long from, unsigne
         return FGRAPH_EBOUNDS;
     }
     
-    if(!(((*graph)->options & FGRAPH_OWEIGHTED) == FGRAPH_OWEIGHTED)) { //use BFS, when implemented
+    if(!(((*graph)->options & FGRAPH_OWEIGHTED) == FGRAPH_OWEIGHTED)) {
         *rweight = 0; //no concept
         return fgraph_sp_bfs(graph, from, to, rvec);
     }
