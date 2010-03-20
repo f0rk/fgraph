@@ -9,7 +9,7 @@ int main() {
     long lval = 0;
     unsigned long ulval = 0;
     
-    tap_plan(106);
+    tap_plan(107);
     
     /* weighted */
     res = fgraph_init(&graph, 8, FGRAPH_ODIRECTED|FGRAPH_OWEIGHTED);
@@ -87,6 +87,9 @@ int main() {
     res = fgraph_clear(&graph);
     tap_ok(res == FGRAPH_SUCCESS, "graph cleared ok");
     tap_ok(graph == 0, "graph is null");
+    
+    res = fgraph_sp_dag(&graph, 0, 7, &rvec, &wval);
+    tap_ok(res == FGRAPH_ENULL, "graph is null");
     
     /* unweighted */
     res = fgraph_init(&graph, 8, FGRAPH_ODIRECTED);

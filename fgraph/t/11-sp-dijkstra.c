@@ -14,7 +14,7 @@ int main() {
     long lval = 0;
     unsigned long ulval = 0;
     
-    tap_plan(82);
+    tap_plan(83);
     
     /* directed + weighted */
     res = fgraph_init(&graph, 8, FGRAPH_ODIRECTED|FGRAPH_OWEIGHTED);
@@ -93,6 +93,9 @@ int main() {
     res = fgraph_clear(&graph);
     tap_ok(res == FGRAPH_SUCCESS, "graph cleared ok");
     tap_ok(graph == 0, "graph is null");
+    
+    res = fgraph_sp_dijkstra(&graph, 0, 7, &rvec, &wval);
+    tap_ok(res == FGRAPH_ENULL, "graph is null");
     
     /* undirected + weighted */
     res = fgraph_init(&graph, 8, FGRAPH_OWEIGHTED);

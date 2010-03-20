@@ -92,4 +92,8 @@
   + fgraph_return_t fgrpah_convert_unweighted(fgraph_t **graph);
   + fgraph_return_t fgraph_convert_undirected(fgraph_t **graph);
 
+* should sp_bfs take another paramter, *rlength, for the resulting path length?
+  - fgraph_return_t fgraph_sp_bfs(fgraph_t **graph, unsigned long from, unsigned long to, fgraph_vec_t **rvec);
+  + fgraph_return_t fgraph_sp_bfs(fgraph_t **graph, unsigned long from, unsigned long to, fgraph_vec_t **rvec, fgraph_edge_weight_t *rlength);
+
 
