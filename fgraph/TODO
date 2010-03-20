@@ -96,4 +96,6 @@
   - fgraph_return_t fgraph_sp_bfs(fgraph_t **graph, unsigned long from, unsigned long to, fgraph_vec_t **rvec);
   + fgraph_return_t fgraph_sp_bfs(fgraph_t **graph, unsigned long from, unsigned long to, fgraph_vec_t **rvec, fgraph_edge_weight_t *rlength);
 
+* fix all the FGRAPH_ENULL returns and actually check for nulls. /facepalm
+
 
