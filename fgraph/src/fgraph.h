@@ -162,7 +162,7 @@ fgraph_return_t fgraph_sp_bfs(fgraph_t **graph, unsigned long from, unsigned lon
 fgraph_return_t fgraph_sort_topological(fgraph_t **graph, fgraph_vec_t **rvec);
 
 /* coloring operations */
-fgraph_return_t fgraph_color_is_kcolorable_bf(fgraph_t **graph, long ncolors, int *rbool);
-fgraph_return_t fgraph_color_is_kcolorable(fgraph_t **graph, long ncolors, int *rbool);
-fgraph_return_t fgraph_color_kcoloring_bf(fgraph_t **graph, long ncolors, fgraph_vec_t **rvec);
-fgraph_return_t fgraph_color_kcoloring(fgraph_t **graph, long ncolors, fgraph_vec_t **rvec);
+fgraph_return_t fgraph_color_is_kcolorable_bf(fgraph_t **graph, unsigned long ncolors, int *rbool);
+fgraph_return_t fgraph_color_is_kcolorable(fgraph_t **graph, unsigned long ncolors, int *rbool);
+fgraph_return_t fgraph_color_kcoloring_bf(fgraph_t **graph, unsigned long ncolors, fgraph_vec_t **rvec);
+fgraph_return_t fgraph_color_kcoloring(fgraph_t **graph, unsigned long ncolors, fgraph_vec_t **rvec);

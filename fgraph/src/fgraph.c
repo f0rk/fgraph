@@ -1768,18 +1768,66 @@ fgraph_return_t fgraph_sort_topological(fgraph_t **graph, fgraph_vec_t **rvec) {
 }
 
 /* coloring operations */
-fgraph_return_t fgraph_color_is_kcolorable_bf(fgraph_t **graph, long ncolors, int *rbool) {
+fgraph_return_t fgraph_color_is_kcolorable_bf(fgraph_t **graph, unsigned long ncolors, int *rbool) {
+    fgraph_vec_t *rvec = 0;
+    
+    if((*graph) == 0) {
+        return FGRAPH_ENULL;
+    }
+    
+    if(rbool == 0) {
+        return FGRAPH_ENULL;
+    }
+    
+    if(fgraph_color_kcoloring_bf(graph, ncolors, &rvec) == FGRAPH_SUCCESS) {
+        *rbool = 1;
+        if(fgraph_vec_clear(&rvec) != FGRAPH_SUCCESS) {
+            return FGRAPH_EUNKNOWN;
+        }
+    } else {
+        *rbool = 0;
+        if(fgraph_vec_clear(&rvec) != FGRAPH_SUCCESS) {
+            return FGRAPH_EUNKNOWN;
+        }
+    }
+    
+    return FGRAPH_SUCCESS;
+}
+
+fgraph_return_t fgraph_color_is_kcolorable(fgraph_t **graph, unsigned long ncolors, int *rbool) {
+    fgraph_vec_t *rvec = 0;
+    
+    if((*graph) == 0) {
+        return FGRAPH_ENULL;
+    }
+    
+    if(rbool == 0) {
+        return FGRAPH_ENULL;
+    }
+    
+    if(fgraph_color_kcoloring(graph, ncolors, &rvec) == FGRAPH_SUCCESS) {
+        *rbool = 1;
+        if(fgraph_vec_clear(&rvec) != FGRAPH_SUCCESS) {
+            return FGRAPH_EUNKNOWN;
+        }
+    } else {
+        *rbool = 0;
+        if(fgraph_vec_clear(&rvec) != FGRAPH_SUCCESS) {
+            return FGRAPH_EUNKNOWN;
+        }
+    }
+    
+    return FGRAPH_SUCCESS; 
+}
+
+fgraph_return_t fgraph_color_kcoloring_bf(fgraph_t **graph, unsigned long ncolors, fgraph_vec_t **rvec) {
+    if((*graph) == 0) {
+        return FGRAPH_ENULL;
+    }
+    
     return FGRAPH_EUNSUP; //TODO: Implement
 }
 
-fgraph_return_t fgraph_color_is_kcolorable(fgraph_t **graph, long ncolors, int *rbool) {
-    return FGRAPH_EUNSUP; //TODO: Implement
-}
-
-fgraph_return_t fgraph_color_kcoloring_bf(fgraph_t **graph, long ncolors, fgraph_vec_t **rvec) {
-    return FGRAPH_EUNSUP; //TODO: Implement
-}
-
-fgraph_return_t fgraph_color_kcoloring(fgraph_t **graph, long ncolors, fgraph_vec_t **rvec) {
-    return FGRAPH_EUNSUP; //TODO: Implement
+fgraph_return_t fgraph_color_kcoloring(fgraph_t **graph, unsigned long ncolors, fgraph_vec_t **rvec) {
+    return fgraph_color_kcoloring(graph, ncolors, rvec); //TODO: make not brute force
 }
