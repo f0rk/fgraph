@@ -11,7 +11,7 @@ int main() {
     unsigned long ulval = 0, *pulval = 0;
     int ival = 0, *pival = 0;
     
-    tap_plan(50);
+    tap_plan(52);
     
     res = fgraph_init(&graph, 8, FGRAPH_OWEIGHTED|FGRAPH_ODIRECTED);
     tap_ok(res == FGRAPH_SUCCESS, "inited ok");
@@ -138,6 +138,10 @@ int main() {
     res = fgraph_edge_exists(&graph, 2, 4, &ival);
     tap_ok(res == FGRAPH_SUCCESS, "checked for edge ok");
     tap_ok(!ival, "edge does not exist");
+    
+    res = fgraph_clear(&graph);
+    tap_ok(res == FGRAPH_SUCCESS, "cleared graph ok");
+    tap_ok(graph == 0, "graph is null");
     
     return tap_status();
 }

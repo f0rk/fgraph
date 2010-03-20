@@ -558,23 +558,9 @@ fgraph_return_t fgraph_heap_init(fgraph_heap_t **heap, unsigned long size) {
         return FGRAPH_ENOMEM;
     }
     
-    if((*heap)->pq != 0) {
-        free(*heap);
-        *heap = 0;
-        return FGRAPH_EINITED;
-    }
-    
-    if((*heap)->qp != 0) {
-        free(*heap);
-        *heap = 0;
-        return FGRAPH_EINITED;
-    }
-    
-    if((*heap)->pri != 0) {
-        free(*heap);
-        *heap = 0;
-        return FGRAPH_EINITED;
-    }
+    (*heap)->pq = 0;
+    (*heap)->qp = 0;
+    (*heap)->pri = 0;
     
     (*heap)->pq = (long*)malloc(sizeof(long)*size);
     if((*heap)->pq == 0) {
@@ -882,7 +868,6 @@ fgraph_return_t fgraph_edge_add(fgraph_t **graph, unsigned long from, unsigned l
     ++((*graph)->ecnt);
     
     if(!(((*graph)->options & FGRAPH_ODIRECTED) == FGRAPH_ODIRECTED)) { //not directed, add the edge in the other direction
-        //return fgraph_edge_add(graph, to, from, weight);
         ne = 0;
         ne = (fgraph_edge_t*)malloc(sizeof(fgraph_edge_t));
         if(ne == 0) {
@@ -918,6 +903,26 @@ fgraph_return_t fgraph_edge_remove(fgraph_t **graph, unsigned long from, unsigne
         return FGRAPH_ENOVTX;
     }
     
+    if(!(((*graph)->options & FGRAPH_ODIRECTED) == FGRAPH_ODIRECTED)) { //not directed, remove the edge in the other direction
+        for(e = (*graph)->vtx_to_edge[to]; e != 0; e = e->next) {
+            if(e->oid == from) { //gotcha
+                if(t == 0) {
+                    t = e;
+                    (*graph)->vtx_to_edge[to] = e->next;
+                    e->next = 0;
+                    free(e);
+                    break;
+                }
+                
+                t->next = e->next;
+                e->next = 0;
+                free(e);
+                break;
+            }
+            t = e;
+        }
+    }
+    
     for(e = (*graph)->vtx_to_edge[from]; e != 0; e = e->next) {
         if(e->oid == to) { //gotcha
             if(t == 0) {
@@ -934,27 +939,6 @@ fgraph_return_t fgraph_edge_remove(fgraph_t **graph, unsigned long from, unsigne
             return FGRAPH_SUCCESS;
         }
         t = e;
-    }
-    
-    if(!(((*graph)->options & FGRAPH_ODIRECTED) == FGRAPH_ODIRECTED)) { //not directed, remove the edge in the other direction
-        e = 0; t = 0;
-        for(e = (*graph)->vtx_to_edge[to]; e != 0; e = e->next) {
-            if(e->oid == from) { //gotcha
-                if(t == 0) {
-                    t = e;
-                    (*graph)->vtx_to_edge[to] = e->next;
-                    e->next = 0;
-                    free(e);
-                    return FGRAPH_SUCCESS;
-                }
-                
-                t->next = e->next;
-                e->next = 0;
-                free(e);
-                return FGRAPH_SUCCESS;
-            }
-            t = e;
-        }
     }
     
     return FGRAPH_ENOEDGE;
@@ -1048,6 +1032,15 @@ fgraph_return_t fgraph_edge_set_weight(fgraph_t **graph, unsigned long from, uns
         return FGRAPH_ENOEDGE;
     }
     
+    if(!(((*graph)->options & FGRAPH_ODIRECTED) == FGRAPH_ODIRECTED)) { //undirected, set the other edge
+        for(e = (*graph)->vtx_to_edge[to]; e != 0; e = e->next) {
+            if(e->oid == from) { //found it
+                e->weight = weight;
+                break;
+            }
+        }
+    }
+    
     //see if the edge exists
     for(e = (*graph)->vtx_to_edge[from]; e != 0; e = e->next) {
         if(e->oid == to) { //found it
@@ -1108,12 +1101,16 @@ fgraph_return_t fgraph_sp_dag(fgraph_t **graph, unsigned long from, unsigned lon
         return FGRAPH_ENULL;
     }
     
+    if(!(((*graph)->options & FGRAPH_ODIRECTED) == FGRAPH_ODIRECTED)) {
+        return FGRAPH_ENOTADAG; //actually it could be a dag, but you shouldn't be this stupid
+    }
+    
     if(from >= (*graph)->size || to >= (*graph)->size) {
         return FGRAPH_EBOUNDS;
     }
     
-    if(!(((*graph)->options & FGRAPH_OWEIGHTED) == FGRAPH_OWEIGHTED)) { //use BFS, when implemented
-        //TODO: Implement fgraph_sp_bfs
+    if(from == to) {
+        return FGRAPH_ENOPATH; //actually there could be a path, but you shouldn't be this stupid
     }
     
     r = fgraph_vec_init_set(&st, (*graph)->size, -1);
@@ -1194,9 +1191,16 @@ fgraph_return_t fgraph_sp_dag(fgraph_t **graph, unsigned long from, unsigned lon
         
         //process each edge out of v
         for(e = (*graph)->vtx_to_edge[v]; e != 0; e = e->next) {
-            if(d[v] + e->weight < d[e->oid]) {
-                d[e->oid] = d[v] + e->weight;
-                p[e->oid] = v;
+            if(((*graph)->options & FGRAPH_OWEIGHTED) == FGRAPH_OWEIGHTED) {
+                if(d[v] + e->weight < d[e->oid]) {
+                    d[e->oid] = d[v] + e->weight;
+                    p[e->oid] = v;
+                }
+            } else {
+                if(d[v] + 1 < d[e->oid]) {
+                    d[e->oid] = d[v] + 1;
+                    p[e->oid] = v;
+                }
             }
         }
     }
@@ -1298,7 +1302,8 @@ fgraph_return_t fgraph_sp_dijkstra(fgraph_t **graph, unsigned long from, unsigne
     }
     
     if(!(((*graph)->options & FGRAPH_OWEIGHTED) == FGRAPH_OWEIGHTED)) { //use BFS, when implemented
-        //TODO: Implement fgraph_sp_bfs
+        *rweight = 0; //no concept
+        return fgraph_sp_bfs(graph, from, to, rvec);
     }
     
     p = (unsigned long*)malloc(sizeof(unsigned long)*((*graph)->size));

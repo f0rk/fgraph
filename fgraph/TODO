@@ -87,4 +87,9 @@
   + fgraph_return_t fgraph_vertex_degree_all(fgraph_t **graph, unsigned long *rvalue);
   + fgraph_return_t fgraph_vertex_degree(fgraph_t **graph, unsigned long vtx, unsigned long *rvalue);
   
+* add support for making an unweighted graph weighted, or a directed graph undirected. what follows:
+  + fgraph_return_t fgraph_convert_weighted(fgraph_t **graph);
+  + fgraph_return_t fgrpah_convert_unweighted(fgraph_t **graph);
+  + fgraph_return_t fgraph_convert_undirected(fgraph_t **graph);
+
 
